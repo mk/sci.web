@@ -20,6 +20,28 @@
 
 (defonce editor-ref (atom nil))
 
+(defn eval! []
+  (try (let [res (eval-string (.getValue @editor-ref) {:bindings {'prn prn
+                                                                  'println println}
+                                                       :realize-max 10000})
+             res-string (pr-str res)]
+         (j/call js/CodeMirror :runMode res-string "clojure" (js/document.getElementById "result")))
+       (catch ExceptionInfo e
+         (let [{:keys [:row]} (ex-data e)]
+           (if row
+             (let [msg (j/get e :message)
+                   editor @editor-ref
+                   msg-node (js/document.createElement "div")
+                   icon-node (.appendChild msg-node (js/document.createElement "span"))
+                   _ (set! (.-innerHTML icon-node) "!!")
+                   _ (set! (.-className icon-node) "lint-error-icon")
+                   _ (.appendChild msg-node (js/document.createTextNode msg))
+                   _ (set! (.-className msg-node) "lint-error")]
+               (j/call editor :addLineWidget (dec row) msg-node))
+             (j/call js/CodeMirror :runMode (str "ERROR: " (j/get e :message))
+                     "clojure"
+                     (js/document.getElementById "result")))))))
+
 (defn editor [id path]
   (r/create-class
    {:render (fn [] [:textarea
@@ -43,34 +65,13 @@
         (.removeKeyMap cm)
         (.setOption cm "extraKeys" #js {:Shift-Tab false
                                         :Tab false})
-        (reset! editor-ref cm)))
+        (reset! editor-ref cm)
+        (eval!)))
     :component-will-unmount
     (fn []
       (let [cm @editor-ref]
         ;; toTextArea will destroy and clean up cm
         (j/call cm :toTextArea cm)))}))
-
-(defn eval! []
-  (try (let [res (eval-string (.getValue @editor-ref) {:bindings {'prn prn
-                                                                  'println println}
-                                                       :realize-max 10000})
-             res-string (pr-str res)]
-         (j/call js/CodeMirror :runMode res-string "clojure" (js/document.getElementById "result")))
-       (catch ExceptionInfo e
-         (let [{:keys [:row]} (ex-data e)]
-           (if row
-             (let [msg (j/get e :message)
-                   editor @editor-ref
-                   msg-node (js/document.createElement "div")
-                   icon-node (.appendChild msg-node (js/document.createElement "span"))
-                   _ (set! (.-innerHTML icon-node) "!!")
-                   _ (set! (.-className icon-node) "lint-error-icon")
-                   _ (.appendChild msg-node (js/document.createTextNode msg))
-                   _ (set! (.-className msg-node) "lint-error")]
-               (j/call editor :addLineWidget (dec row) msg-node))
-             (j/call js/CodeMirror :runMode (str "ERROR: " (j/get e :message))
-                     "clojure"
-                     (js/document.getElementById "result")))))))
 
 (defn controls []
   [:div.buttons
