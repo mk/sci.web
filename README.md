@@ -1,6 +1,6 @@
 # sci.web
 
-An online playground for the [Small Clojure Interpret](https://github.com/borkdude/sci)
+An online playground for the [Small Clojure Interpreter](https://github.com/borkdude/sci)
 hosted [here](https://borkdude.github.io/sci.web).
 
 ## Development
