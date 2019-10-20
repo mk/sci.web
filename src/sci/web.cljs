@@ -48,16 +48,15 @@
     (fn []
       (let [cm @editor-ref]
         ;; toTextArea will destroy and clean up cm
-        (.toTextArea cm)))}))
+        (j/call cm :toTextArea cm)))}))
 
 (defn eval! []
   (try (let [res (eval-string (.getValue @editor-ref) {:bindings {'prn prn
                                                                   'println println}
                                                        :realize-max 10000})
              res-string (pr-str res)]
-         (js/CodeMirror.runMode res-string "clojure" (js/document.getElementById "result")))
+         (j/call js/CodeMirror :runMode res-string "clojure" (js/document.getElementById "result")))
        (catch ExceptionInfo e
-         (set! (.-err1 js/window) e)
          (let [{:keys [:row]} (ex-data e)]
            (if row
              (let [msg (j/get e :message)
@@ -69,20 +68,20 @@
                    _ (.appendChild msg-node (js/document.createTextNode msg))
                    _ (set! (.-className msg-node) "lint-error")]
                (j/call editor :addLineWidget (dec row) msg-node))
-             (js/CodeMirror.runMode (str "ERROR: " (j/get e :message))
-                                    "clojure"
-                                    (js/document.getElementById "result")))))))
+             (j/call js/CodeMirror :runMode (str "ERROR: " (j/get e :message))
+                     "clojure"
+                     (js/document.getElementById "result")))))))
 
 (defn controls []
   [:div.buttons
    [:button.btn.btn-sm.btn-outline-primary
-    {:on-click eval! #_#(j/call @editor-ref :performLint)}
+    {:on-click eval!}
     "eval!"]
    [:button.btn.btn-sm.btn-outline-primary
-    {:on-click #(.setValue @editor-ref "\n\n")}
+    {:on-click #(j/call @editor-ref :setValue "\n\n")}
     "clear!"]
    [:button.btn.btn-sm.btn-outline-primary
-    {:on-click #(do (.setValue @editor-ref initial-code))}
+    {:on-click #(do (j/call @editor-ref :setValue initial-code))}
     "reset!"]])
 
 (defn app []
