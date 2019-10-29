@@ -33,7 +33,7 @@
                                                       :realize-max 10000})
             res-string (pr-str res)]
         (j/call js/CodeMirror :runMode res-string "clojure" (js/document.getElementById "result")))
-      (catch ExceptionInfo e
+      (catch js/Error e
         (let [{:keys [:row]} (ex-data e)]
           (if row
             (let [msg (j/get e :message)
