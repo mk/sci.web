@@ -19,30 +19,38 @@
 ")
 
 (defonce editor-ref (atom nil))
+(defonce warnings-ref (atom []))
 
 (defn eval! []
-  (try (let [res (eval-string (.getValue @editor-ref) {:bindings {'prn prn
-                                                                  'println println}
-                                                       :realize-max 10000})
-             res-string (pr-str res)]
-         (j/call js/CodeMirror :runMode res-string "clojure" (js/document.getElementById "result")))
-       (catch ExceptionInfo e
-         (let [{:keys [:row]} (ex-data e)]
-           (if row
-             (let [msg (j/get e :message)
-                   editor @editor-ref
-                   msg-node (js/document.createElement "div")
-                   icon-node (.appendChild msg-node (js/document.createElement "span"))
-                   _ (set! (.-innerHTML icon-node) "!!")
-                   _ (set! (.-className icon-node) "lint-error-icon")
-                   _ (.appendChild msg-node (js/document.createTextNode msg))
-                   _ (set! (.-className msg-node) "lint-error")]
-               (j/call editor :addLineWidget (dec row) msg-node))
-             (j/call js/CodeMirror :runMode (str "ERROR: " (j/get e :message))
-                     "clojure"
-                     (js/document.getElementById "result")))))))
+  (let [editor @editor-ref]
+    (try
+      (doseq [node @warnings-ref]
+        ;; see https://github.com/codemirror/CodeMirror/blob/75b12befaadff25de537f4117f13c38fce0c6895/demo/widget.html#L38
+        (j/call editor :removeLineWidget node))
+      (reset! warnings-ref [])
+      (let [res (eval-string (.getValue @editor-ref) {:namespaces {'clojure.core {'prn prn
+                                                                                  'println println}}
+                                                      :realize-max 10000})
+            res-string (pr-str res)]
+        (j/call js/CodeMirror :runMode res-string "clojure" (js/document.getElementById "result")))
+      (catch ExceptionInfo e
+        (let [{:keys [:row]} (ex-data e)]
+          (if row
+            (let [msg (j/get e :message)
+                  msg-node (js/document.createElement "div")
+                  icon-node (.appendChild msg-node (js/document.createElement "span"))]
+              (set! (.-innerHTML icon-node) "!!")
+              (set! (.-className icon-node) "lint-error-icon")
+              (.appendChild msg-node (js/document.createTextNode msg))
+              (set! (.-className msg-node) "lint-error")
+              ;; see https://github.com/codemirror/CodeMirror/blob/75b12befaadff25de537f4117f13c38fce0c6895/demo/widget.html#L51
+              (let [lw (j/call editor :addLineWidget (dec row) msg-node)]
+                (swap! warnings-ref conj lw)))
+            (j/call js/CodeMirror :runMode (str "ERROR: " (j/get e :message))
+                    "clojure"
+                    (js/document.getElementById "result"))))))))
 
-(defn editor [id path]
+(defn editor [id]
   (r/create-class
    {:render (fn [] [:textarea
                     {:type "text"
@@ -51,7 +59,8 @@
                      :auto-complete "off"}])
     :component-did-mount
     (fn [this]
-      (let [opts #js {:mode "clojure"
+      (let [node (r/dom-node this)
+            opts #js {:mode "clojure"
                       :matchBrackets true
                       ;;parinfer does this better
                       ;;:autoCloseBrackets true
@@ -59,7 +68,7 @@
                       :lint #js {:lintOnChange false}
                       :gutters #js ["CodeMirror-lint-markers"]}
             cm (.fromTextArea js/CodeMirror
-                              (r/dom-node this)
+                              node
                               opts)]
         (js/parinferCodeMirror.init cm)
         (.removeKeyMap cm)
@@ -82,7 +91,7 @@
     {:on-click #(j/call @editor-ref :setValue "\n\n")}
     "clear!"]
    [:button.btn.btn-sm.btn-outline-primary
-    {:on-click #(do (j/call @editor-ref :setValue initial-code))}
+    {:on-click #(j/call @editor-ref :setValue initial-code)}
     "reset!"]])
 
 (defn app []
@@ -95,7 +104,7 @@
       " playground"]]]
    [:div
     [controls]
-    [editor "code" [:code]]
+    [editor "code"]
     [controls]
     [:h2 "Result:"]
     [:div#result.cm-s-default.mono.inline]]])
