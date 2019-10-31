@@ -8,9 +8,9 @@
    [cljsjs.codemirror.mode.clojure]
    [cljsjs.parinfer]
    [cljsjs.parinfer-codemirror]
+   [clojure.string :as str]
    [reagent.core :as r]
    [sci.core :refer [eval-string]]
-   [clojure.string :as str]
    [sci.gist :as gist])
   (:import [goog Uri]))
 
@@ -21,10 +21,7 @@
 (let [x 1] (bindings))
 "))
 
-(def initial-opts (atom (str/join "\n" ["{:realize-max 100"
-                                        ":read-cond :allow"
-                                        ":features #{:clj}"
-                                        "}"])))
+(def initial-opts (atom "{:realize-max 100}\n"))
 
 (defonce gist-ref (r/atom ""))
 (defonce title-ref (r/atom ""))
@@ -121,11 +118,19 @@
     {:on-click eval!}
     "eval!"]
    [:button.btn.btn-sm.btn-outline-primary
-    {:on-click #(j/call @editor-ref :setValue "\n\n")}
+    {:on-click #(do (j/call @editor-ref :setValue "\n\n")
+                    (j/call @options-ref :setValue "\n\n"))}
     "clear!"]
    [:button.btn.btn-sm.btn-outline-primary
-    {:on-click #(j/call @editor-ref :setValue initial-code)}
+    {:on-click #(do (j/call @editor-ref :setValue @initial-code)
+                    (j/call @options-ref :setValue @initial-opts))}
     "reset!"]])
+
+(defn examples []
+  [:div
+   [:h3 "Examples:"]
+   [:ul
+    [:li [:a {:href "/?gist=borkdude/33d757d5080eb61051c5db9c597d0b38"} "Reader conditionals"]]]])
 
 (defn app []
   [:div#sci.container
@@ -146,7 +151,8 @@
     [editor "opts"]
     [controls]
     [:h3 "Result:"]
-    [:div#result.cm-s-default.mono.inline]]])
+    [:div#result.cm-s-default.mono.inline]
+    [examples]]])
 
 (defn mount [el]
   (r/render-component [app] el))
