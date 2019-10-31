@@ -5,7 +5,7 @@
   position: relative;
 }
 
-.bg-img {
+#bg-img {
   width: 90px;
   height: 90px;
   background-image: url("https://raw.githubusercontent.com/borkdude/sci/master/logo/icon.png");
@@ -17,7 +17,7 @@
 }
 
 .loading {
-  -webkit-animation: rotation .5s infinite linear;
+  -webkit-animation: rotation 1s infinite linear;
 }
 
 @-webkit-keyframes rotation {
