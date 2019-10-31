@@ -26,6 +26,7 @@
                                         ":features #{:clj}"
                                         "}"])))
 
+(defonce gist-ref (r/atom ""))
 (defonce title-ref (r/atom ""))
 
 (defonce editor-ref (atom nil))
@@ -41,11 +42,12 @@
         qd (.getQueryData uri)
         gist (first (.getValues qd "gist"))]
     (if gist
-      (gist/load-gist gist (fn [{:keys [:title :options :code]}]
-                             (reset! title-ref title)
-                             (reset! initial-code code)
-                             (reset! initial-opts options)
-                             (cb)))
+      (do (reset! gist-ref gist)
+          (gist/load-gist gist (fn [{:keys [:title :options :code]}]
+                                 (reset! title-ref title)
+                                 (reset! initial-code code)
+                                 (reset! initial-opts options)
+                                 (cb))))
       (cb))))
 
 (defn eval! []
@@ -135,7 +137,7 @@
       " playground"]]]
    [:div
     (when-let [t (not-empty @title-ref)]
-      [:h2 t])
+      [:a {:href (str "https://gist.github.com/" @gist-ref)} [:h2 t]])
     [controls]
     [:h3 "Code"]
     [editor "code"]
