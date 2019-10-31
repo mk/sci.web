@@ -21,13 +21,11 @@
 "))
 
 (defonce initial-opts (atom "{:realize-max 100}\n"))
-
-(defonce gist-ref (r/atom ""))
+(defonce loading? (r/atom false))
 (defonce title-ref (r/atom ""))
 
 (defonce editor-ref (atom nil))
 (defonce options-ref (atom nil))
-
 (defonce warnings-ref (atom []))
 
 (defn state-from-query-params [cb]
@@ -36,12 +34,14 @@
         qd (.getQueryData uri)
         gist (first (.getValues qd "gist"))]
     (if gist
-      (do (reset! gist-ref gist)
-          (gist/load-gist gist (fn [{:keys [:title :options :code]}]
-                                 (reset! title-ref title)
-                                 (reset! initial-code code)
-                                 (reset! initial-opts options)
-                                 (cb))))
+      (do
+        (reset! loading? true)
+        (gist/load-gist gist (fn [{:keys [:title :options :code]}]
+                               (reset! title-ref title)
+                               (reset! initial-code code)
+                               (reset! initial-opts options)
+                               (reset! loading? false)
+                               (cb))))
       (cb))))
 
 (defn eval! []
@@ -106,8 +106,8 @@
     :component-will-unmount
     (fn []
       (let [cm (case id
-                      "code" @editor-ref
-                      "opts"  @options-ref)]
+                 "code" @editor-ref
+                 "opts"  @options-ref)]
         ;; toTextArea will destroy and clean up cm
         (j/call cm :toTextArea cm)))}))
 
@@ -159,6 +159,8 @@
 
 (defn app []
   [:div#sci.container
+   [:div.bg-img
+    {:class (when @loading? "loading")}]
    [:div.row
     [:p.col-12.lead
      [:span [:a {:href "https://github.com/borkdude/sci"}
