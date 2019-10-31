@@ -137,7 +137,8 @@
       " playground"]]]
    [:div
     (when-let [t (not-empty @title-ref)]
-      [:a {:href (str "https://gist.github.com/" @gist-ref)} [:h2 t]])
+      [:div
+       [:h2 t " " [:a {:href (str "https://gist.github.com/" @gist-ref)} "_"]]])
     [controls]
     [:h3 "Code"]
     [editor "code"]
