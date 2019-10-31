@@ -138,7 +138,8 @@
     (when (not= new-url (.. js/window -location -href))
       (.pushState js/window.history nil "" new-url)
       (state-from-query-params #(do (j/call @editor-ref :setValue @initial-code)
-                                    (j/call @options-ref :setValue @initial-opts))))))
+                                    (j/call @options-ref :setValue @initial-opts)
+                                    (eval!))))))
 
 (def example-data
   [{:gist "borkdude/33d757d5080eb61051c5db9c597d0b38" :title "Reader conditionals"}
