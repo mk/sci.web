@@ -13,14 +13,14 @@
    [sci.gist :as gist])
   (:import [goog Uri]))
 
-(def initial-code (atom "(defmacro bindings []
+(defonce initial-code (atom "(defmacro bindings []
   (zipmap (mapv #(list 'quote %) (keys &env))
           (keys &env)))
 
 (let [x 1] (bindings))
 "))
 
-(def initial-opts (atom "{:realize-max 100}\n"))
+(defonce initial-opts (atom "{:realize-max 100}\n"))
 
 (defonce gist-ref (r/atom ""))
 (defonce title-ref (r/atom ""))
@@ -105,7 +105,9 @@
         (eval!)))
     :component-will-unmount
     (fn []
-      (let [cm @editor-ref]
+      (let [cm (case id
+                      "code" @editor-ref
+                      "opts"  @options-ref)]
         ;; toTextArea will destroy and clean up cm
         (j/call cm :toTextArea cm)))}))
 
@@ -123,12 +125,33 @@
                     (j/call @options-ref :setValue @initial-opts))}
     "reset!"]])
 
+(defn new-address [gist]
+  (let [uri (.parse Uri (.. js/window -location -href))
+        qd (-> (Uri.QueryData.)
+               (.add "gist" gist))]
+    (.setQueryData uri qd)
+    (str uri)))
+
+(defn load-example [event gist]
+  (.preventDefault event)
+  (let [new-url (new-address gist)]
+    (when (not= new-url (.. js/window -location -href))
+      (.pushState js/window.history nil "" new-url)
+      (state-from-query-params #(do (j/call @editor-ref :setValue @initial-code)
+                                    (j/call @options-ref :setValue @initial-opts))))))
+
+(def example-data
+  [{:gist "borkdude/33d757d5080eb61051c5db9c597d0b38" :title "Reader conditionals"}
+   {:gist "borkdude/66a5a4614985f7de30f849650c05ed71" :title "Realize max"}])
+
 (defn examples []
   [:div
    [:h3 "Examples:"]
    [:ul
-    [:li [:a {:href "?gist=borkdude/33d757d5080eb61051c5db9c597d0b38"} "Reader conditionals"]]
-    [:li [:a {:href "?gist=borkdude/66a5a4614985f7de30f849650c05ed71"} "Realize max"]]]])
+    (for [{:keys [:gist :title]} example-data]
+      ^{:key gist}
+      [:li [:a {:href ""
+                :on-click #(load-example % gist)} title]])]])
 
 (defn app []
   [:div#sci.container
