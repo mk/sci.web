@@ -2,6 +2,11 @@
 
 #sci {
   margin: 2em;
+  background-image: url("https://raw.githubusercontent.com/borkdude/sci/master/logo/icon.png");
+  background-position: right 10px top;
+  background-repeat: no-repeat;
+  background-size: 90px 90px;
+  position: relative;
 }
 
 /* footer always at bottom */
