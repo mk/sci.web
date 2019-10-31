@@ -130,7 +130,7 @@
   [:div
    [:h3 "Examples:"]
    [:ul
-    [:li [:a {:href "/?gist=borkdude/33d757d5080eb61051c5db9c597d0b38"} "Reader conditionals"]]]])
+    [:li [:a {:href "?gist=borkdude/33d757d5080eb61051c5db9c597d0b38"} "Reader conditionals"]]]])
 
 (defn app []
   [:div#sci.container
