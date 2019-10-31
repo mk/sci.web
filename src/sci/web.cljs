@@ -10,24 +10,43 @@
    [cljsjs.parinfer-codemirror]
    [reagent.core :as r]
    [sci.core :refer [eval-string]]
-   [clojure.string :as str]))
+   [clojure.string :as str]
+   [sci.gist :as gist])
+  (:import [goog Uri]))
 
-(def initial-code "(defmacro bindings []
+(def initial-code (atom "(defmacro bindings []
   (zipmap (mapv #(list 'quote %) (keys &env))
           (keys &env)))
 
 (let [x 1] (bindings))
-")
+"))
 
-(def initial-opts (str/join "\n" ["{:realize-max 100"
-                                  ":read-cond :allow"
-                                  ":features #{:clj}"
-                                  "}"]))
+(def initial-opts (atom (str/join "\n" ["{:realize-max 100"
+                                        ":read-cond :allow"
+                                        ":features #{:clj}"
+                                        "}"])))
+
+(defonce title-ref (r/atom ""))
 
 (defonce editor-ref (atom nil))
 (defonce options-ref (atom nil))
 
 (defonce warnings-ref (atom []))
+
+(declare eval!)
+
+(defn state-from-query-params [cb]
+  (let [uri (-> js/window .-location .-href)
+        uri (.parse Uri uri)
+        qd (.getQueryData uri)
+        gist (first (.getValues qd "gist"))]
+    (if gist
+      (gist/load-gist gist (fn [{:keys [:title :options :code]}]
+                             (reset! title-ref title)
+                             (reset! initial-code code)
+                             (reset! initial-opts options)
+                             (cb)))
+      (cb))))
 
 (defn eval! []
   (let [editor @editor-ref
@@ -64,8 +83,8 @@
                     {:type "text"
                      :id id
                      :default-value (case id
-                                      "code" initial-code
-                                      "opts" initial-opts)
+                                      "code" @initial-code
+                                      "opts" @initial-opts)
                      :auto-complete "off"}])
     :component-did-mount
     (fn [this]
@@ -115,6 +134,8 @@
              "Small Clojure Interpreter"]
       " playground"]]]
    [:div
+    (when-let [t (not-empty @title-ref)]
+      [:h2 t])
     [controls]
     [:h3 "Code"]
     [editor "code"]
@@ -129,7 +150,7 @@
 
 (defn mount-app-element []
   (when-let [el (js/document.getElementById "app")]
-    (mount el)))
+    (state-from-query-params #(mount el))))
 
 ;; conditionally start your application based on the presence of an "app" element
 ;; this is particularly helpful for testing this ns without launching the app

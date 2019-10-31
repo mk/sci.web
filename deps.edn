@@ -5,6 +5,7 @@
         cljsjs/parinfer-codemirror {:mvn/version "1.4.1-2"}
         borkdude/sci {:git/url "https://github.com/borkdude/sci"
                       :sha "35d845e32b996408b31b1d479f2d56aa0ac42012"}
+        cljs-ajax {:mvn/version "0.8.0"}
         appliedscience/js-interop {:mvn/version "0.1.20"}}
  :paths ["src" "resources"]
  :aliases {:fig {:extra-deps
