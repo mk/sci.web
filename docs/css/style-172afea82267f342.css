@@ -2,11 +2,31 @@
 
 #sci {
   margin: 2em;
+  position: relative;
+}
+
+.bg-img {
+  width: 90px;
+  height: 90px;
   background-image: url("https://raw.githubusercontent.com/borkdude/sci/master/logo/icon.png");
-  background-position: right 10px top;
   background-repeat: no-repeat;
   background-size: 90px 90px;
-  position: relative;
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
+
+.loading {
+  -webkit-animation: rotation .5s infinite linear;
+}
+
+@-webkit-keyframes rotation {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+  }
 }
 
 /* footer always at bottom */
