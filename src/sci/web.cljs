@@ -35,7 +35,8 @@
         gist (first (.getValues qd "gist"))]
     (if gist
       (do
-        (reset! loading? direction)
+        (swap! loading? (fn [v]
+                          (or v direction)))
         (gist/load-gist gist (fn [{:keys [:title :options :code]}]
                                (reset! title-ref title)
                                (reset! initial-code code)
@@ -44,6 +45,8 @@
       (cb))))
 
 (defn eval! []
+  (swap! loading? (fn [v]
+                    (or v :forward)))
   (let [editor @editor-ref
         opts @options-ref]
     (try
@@ -201,7 +204,7 @@
   (set! (.-onpopstate js/window)
         (fn [ev]
           (let [s (.-state ev)
-                back? (> @history-count s)]
+                back? (or (nil? s) (< s @history-count))]
             (reset! history-count s)
             (reload! (if back? :back :forward)))))
   (when-let [el (js/document.getElementById "app")]
