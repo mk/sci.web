@@ -132,14 +132,17 @@
     (.setQueryData uri qd)
     (str uri)))
 
+(defn reload! []
+  (state-from-query-params #(do (j/call @editor-ref :setValue @initial-code)
+                                (j/call @options-ref :setValue @initial-opts)
+                                (eval!))))
+
 (defn load-example [event gist]
   (.preventDefault event)
   (let [new-url (new-address gist)]
     (when (not= new-url (.. js/window -location -href))
       (.pushState js/window.history nil "" new-url)
-      (state-from-query-params #(do (j/call @editor-ref :setValue @initial-code)
-                                    (j/call @options-ref :setValue @initial-opts)
-                                    (eval!))))))
+      (reload!))))
 
 (def example-data
   [{:gist "borkdude/33d757d5080eb61051c5db9c597d0b38" :title "Reader conditionals"}
@@ -193,3 +196,7 @@
   ;; your application
   ;; (swap! app-state update-in [:__figwheel_counter] inc)
   )
+
+(set! (.-onpopstate js/window)
+      (fn [_]
+        (reload!)))
