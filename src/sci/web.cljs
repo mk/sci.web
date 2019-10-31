@@ -21,7 +21,7 @@
 "))
 
 (defonce initial-opts (atom "{:realize-max 100}\n"))
-(defonce loading? (r/atom false))
+(defonce loading? (r/atom true))
 (defonce title-ref (r/atom ""))
 
 (defonce editor-ref (atom nil))
@@ -40,7 +40,6 @@
                                (reset! title-ref title)
                                (reset! initial-code code)
                                (reset! initial-opts options)
-                               (reset! loading? false)
                                (cb))))
       (cb))))
 
@@ -158,32 +157,43 @@
                 :on-click #(load-example % gist)} title]])]])
 
 (defn app []
-  [:div#sci.container
-   [:div.bg-img
-    {:class (when @loading? "loading")}]
-   [:div.row
-    [:p.col-12.lead
-     [:span [:a {:href "https://github.com/borkdude/sci"}
-             "Small Clojure Interpreter"]
-      " playground"]]]
-   [:div
-    (when-let [t (not-empty @title-ref)]
-      [:div
-       [:h2 t]])
-    [controls]
-    [:h3 "Code"]
-    [editor "code"]
-    [:h3 "Options"]
-    [editor "opts"]
-    [controls]
-    [:h3 "Result:"]
-    [:div#result.cm-s-default.mono.inline]
-    [examples]]])
+  (r/create-class
+   {:reagent-render
+    (fn []
+      [:div#sci.container
+       [:div#bg-img
+        {:class (when @loading? "loading")}]
+       [:div.row
+        [:p.col-12.lead
+         [:span [:a {:href "https://github.com/borkdude/sci"}
+                 "Small Clojure Interpreter"]
+          " playground"]]]
+       [:div
+        (when-let [t (not-empty @title-ref)]
+          [:div
+           [:h2 t]])
+        [controls]
+        [:h3 "Code"]
+        [editor "code"]
+        [:h3 "Options"]
+        [editor "opts"]
+        [controls]
+        [:h3 "Result:"]
+        [:div#result.cm-s-default.mono.inline]
+        [examples]]])
+    :component-did-mount
+    (fn [_]
+      (let [bg-img-node (.getElementById (.-document js/window) "bg-img")]
+        (.addEventListener bg-img-node "animationiteration"
+                           (fn [_] (reset! loading? false)))))}))
 
 (defn mount [el]
   (r/render-component [app] el))
 
 (defn mount-app-element []
+  (set! (.-onpopstate js/window)
+        (fn [_]
+          (reload!)))
   (when-let [el (js/document.getElementById "app")]
     (state-from-query-params #(mount el))))
 
@@ -198,7 +208,3 @@
   ;; your application
   ;; (swap! app-state update-in [:__figwheel_counter] inc)
   )
-
-(set! (.-onpopstate js/window)
-      (fn [_]
-        (reload!)))
