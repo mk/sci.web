@@ -21,21 +21,21 @@
 "))
 
 (defonce initial-opts (atom "{:realize-max 100}\n"))
-(defonce loading? (r/atom true))
+(defonce loading? (r/atom :forward))
 (defonce title-ref (r/atom ""))
 
 (defonce editor-ref (atom nil))
 (defonce options-ref (atom nil))
 (defonce warnings-ref (atom []))
 
-(defn state-from-query-params [cb]
+(defn state-from-query-params [cb direction]
   (let [uri (-> js/window .-location .-href)
         uri (.parse Uri uri)
         qd (.getQueryData uri)
         gist (first (.getValues qd "gist"))]
     (if gist
       (do
-        (reset! loading? true)
+        (reset! loading? direction)
         (gist/load-gist gist (fn [{:keys [:title :options :code]}]
                                (reset! title-ref title)
                                (reset! initial-code code)
@@ -131,17 +131,21 @@
     (.setQueryData uri qd)
     (str uri)))
 
-(defn reload! []
+(defn reload! [direction]
   (state-from-query-params #(do (j/call @editor-ref :setValue @initial-code)
                                 (j/call @options-ref :setValue @initial-opts)
-                                (eval!))))
+                                (eval!))
+                           direction))
+
+(defonce history-count (atom 0))
 
 (defn load-example [event gist]
   (.preventDefault event)
   (let [new-url (new-address gist)]
     (when (not= new-url (.. js/window -location -href))
-      (.pushState js/window.history nil "" new-url)
-      (reload!))))
+      (let [c (swap! history-count inc)]
+        (.pushState js/window.history c "" new-url))
+      (reload! :forward))))
 
 (def example-data
   [{:gist "borkdude/33d757d5080eb61051c5db9c597d0b38" :title "Reader conditionals"}
@@ -162,7 +166,10 @@
     (fn []
       [:div#sci.container
        [:div#bg-img
-        {:class (when @loading? "loading")}]
+        {:class (case @loading?
+                  :forward "loading"
+                  :back "loading-back"
+                  nil)}]
        [:div.row
         [:p.col-12.lead
          [:span [:a {:href "https://github.com/borkdude/sci"}
@@ -192,10 +199,13 @@
 
 (defn mount-app-element []
   (set! (.-onpopstate js/window)
-        (fn [_]
-          (reload!)))
+        (fn [ev]
+          (let [s (.-state ev)
+                back? (> @history-count s)]
+            (reset! history-count s)
+            (reload! (if back? :back :forward)))))
   (when-let [el (js/document.getElementById "app")]
-    (state-from-query-params #(mount el))))
+    (state-from-query-params #(mount el) :forward)))
 
 ;; conditionally start your application based on the presence of an "app" element
 ;; this is particularly helpful for testing this ns without launching the app

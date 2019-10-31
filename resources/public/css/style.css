@@ -17,17 +17,32 @@
 }
 
 .loading {
-  -webkit-animation: rotation 1s infinite linear;
+  animation: rotation 1.5s infinite ease;
 }
 
-@-webkit-keyframes rotation {
+.loading-back {
+  animation: back-rotation 1.5s infinite ease;
+}
+
+
+@keyframes rotation {
   from {
-    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
   }
   to {
-    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
   }
 }
+
+@keyframes back-rotation {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
 
 /* footer always at bottom */
 /* https://codepen.io/cbracco/pen/zekgx */
