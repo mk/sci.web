@@ -9,7 +9,8 @@
    [cljsjs.parinfer]
    [cljsjs.parinfer-codemirror]
    [reagent.core :as r]
-   [sci.core :refer [eval-string]]))
+   [sci.core :refer [eval-string]]
+   [clojure.string :as str]))
 
 (def initial-code "(defmacro bindings []
   (zipmap (mapv #(list 'quote %) (keys &env))
@@ -18,19 +19,26 @@
 (let [x 1] (bindings))
 ")
 
+(def initial-opts (str/join "\n" ["{:realize-max 100"
+                                  ":read-cond :allow"
+                                  ":features #{:clj}"
+                                  "}"]))
+
 (defonce editor-ref (atom nil))
+(defonce options-ref (atom nil))
+
 (defonce warnings-ref (atom []))
 
 (defn eval! []
-  (let [editor @editor-ref]
+  (let [editor @editor-ref
+        opts @options-ref]
     (try
       (doseq [node @warnings-ref]
         ;; see https://github.com/codemirror/CodeMirror/blob/75b12befaadff25de537f4117f13c38fce0c6895/demo/widget.html#L38
         (j/call editor :removeLineWidget node))
       (reset! warnings-ref [])
-      (let [res (eval-string (.getValue @editor-ref) {:namespaces {'clojure.core {'prn prn
-                                                                                  'println println}}
-                                                      :realize-max 10000})
+      (let [opts (eval-string (.getValue opts) {:realize-max 10000})
+            res (eval-string (.getValue editor) (assoc-in opts [:namespaces 'clojure.core 'prn] prn))
             res-string (pr-str res)]
         (j/call js/CodeMirror :runMode res-string "clojure" (js/document.getElementById "result")))
       (catch js/Error e
@@ -55,7 +63,9 @@
    {:render (fn [] [:textarea
                     {:type "text"
                      :id id
-                     :default-value initial-code
+                     :default-value (case id
+                                      "code" initial-code
+                                      "opts" initial-opts)
                      :auto-complete "off"}])
     :component-did-mount
     (fn [this]
@@ -74,7 +84,9 @@
         (.removeKeyMap cm)
         (.setOption cm "extraKeys" #js {:Shift-Tab false
                                         :Tab false})
-        (reset! editor-ref cm)
+        (reset! (case id
+                  "code" editor-ref
+                  "opts"  options-ref) cm)
         (eval!)))
     :component-will-unmount
     (fn []
@@ -104,9 +116,12 @@
       " playground"]]]
    [:div
     [controls]
+    [:h3 "Code"]
     [editor "code"]
+    [:h3 "Options"]
+    [editor "opts"]
     [controls]
-    [:h2 "Result:"]
+    [:h3 "Result:"]
     [:div#result.cm-s-default.mono.inline]]])
 
 (defn mount [el]
