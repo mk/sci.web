@@ -8,7 +8,6 @@
    [cljsjs.codemirror.mode.clojure]
    [cljsjs.parinfer]
    [cljsjs.parinfer-codemirror]
-   [clojure.string :as str]
    [reagent.core :as r]
    [sci.core :refer [eval-string]]
    [sci.gist :as gist])
@@ -30,8 +29,6 @@
 (defonce options-ref (atom nil))
 
 (defonce warnings-ref (atom []))
-
-(declare eval!)
 
 (defn state-from-query-params [cb]
   (let [uri (-> js/window .-location .-href)
@@ -130,20 +127,20 @@
   [:div
    [:h3 "Examples:"]
    [:ul
-    [:li [:a {:href "?gist=borkdude/33d757d5080eb61051c5db9c597d0b38"} "Reader conditionals"]]]])
+    [:li [:a {:href "?gist=borkdude/33d757d5080eb61051c5db9c597d0b38"} "Reader conditionals"]]
+    [:li [:a {:href "?gist=borkdude/66a5a4614985f7de30f849650c05ed71"} "Realize max"]]]])
 
 (defn app []
   [:div#sci.container
    [:div.row
     [:p.col-12.lead
-     [:span [:a {:href "https://github.com/borkdude/sci"
-                 :target "_blank"}
+     [:span [:a {:href "https://github.com/borkdude/sci"}
              "Small Clojure Interpreter"]
       " playground"]]]
    [:div
     (when-let [t (not-empty @title-ref)]
       [:div
-       [:h2 t " " [:a {:href (str "https://gist.github.com/" @gist-ref)} "_"]]])
+       [:h2 t]])
     [controls]
     [:h3 "Code"]
     [editor "code"]
