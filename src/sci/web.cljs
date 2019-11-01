@@ -172,8 +172,8 @@
       [:div#sci.container
        [:div#bg-img
         {:class (case @loading?
-                  :forward "loading"
-                  :back "loading-back"
+                  :forward "animated infinite rubberBand"
+                  :back "animated infinite swing"
                   nil)}]
        [:div.row
         [:p.col-12.lead

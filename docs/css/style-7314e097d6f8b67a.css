@@ -16,34 +16,6 @@
   top: 10px;
 }
 
-.loading {
-  animation: rotation 1.5s infinite ease;
-}
-
-.loading-back {
-  animation: back-rotation 1.5s infinite ease;
-}
-
-
-@keyframes rotation {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes back-rotation {
-  from {
-    transform: rotate(360deg);
-  }
-  to {
-    transform: rotate(0deg);
-  }
-}
-
-
 /* footer always at bottom */
 /* https://codepen.io/cbracco/pen/zekgx */
 
