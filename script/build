@@ -17,6 +17,7 @@ mkdir -p docs/js
 cp out/main.js "docs/js/main-$commit.js"
 mkdir -p docs/css
 cp resources/public/css/style.css "docs/css/style-$commit.css"
+cp -R resources/public/css/vendor "docs/css/vendor"
 cp resources/public/prod.html docs/index.html
 sed -i.bak "s/\$COMMIT/$commit/g" docs/index.html
 rm "docs/index.html.bak"
