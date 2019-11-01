@@ -123,7 +123,9 @@
                     (j/call @options-ref :setValue "\n\n"))}
     "clear!"]
    [:button.btn.btn-sm.btn-outline-primary
-    {:on-click #(do (j/call @editor-ref :setValue @initial-code)
+    {:on-click #(do (swap! loading? (fn [v]
+                                      (or v :back)))
+                    (j/call @editor-ref :setValue @initial-code)
                     (j/call @options-ref :setValue @initial-opts))}
     "reset!"]])
 
