@@ -12,12 +12,16 @@ if [ "$PREVIOUS" != "true" ]; then
 fi
 
 echo "Preparing deploy folder"
-rm -rf docs
-mkdir -p docs/js
-cp out/main.js "docs/js/main-$commit.js"
-mkdir -p docs/css
-cp resources/public/css/style.css "docs/css/style-$commit.css"
-cp -R resources/public/css/vendor "docs/css/vendor"
-cp resources/public/prod.html docs/index.html
-sed -i.bak "s/\$COMMIT/$commit/g" docs/index.html
-rm "docs/index.html.bak"
+
+# clean, but don't remove entire dist folder, since it's a git worktree
+rm -rf dist/js
+rm -rf dist/css
+
+mkdir -p dist/js
+cp out/main.js "dist/js/main-$commit.js"
+mkdir -p dist/css
+cp resources/public/css/style.css "dist/css/style-$commit.css"
+cp -R resources/public/css/vendor "dist/css/vendor"
+cp resources/public/prod.html dist/index.html
+sed -i.bak "s/\$COMMIT/$commit/g" dist/index.html
+rm "dist/index.html.bak"
