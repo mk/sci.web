@@ -1,0 +1,69 @@
+/* some style */
+
+#sci {
+  margin: 2em;
+  position: relative;
+}
+
+#bg-img {
+  width: 90px;
+  height: 90px;
+  background-image: url("https://raw.githubusercontent.com/borkdude/sci/master/logo/icon.png");
+  background-repeat: no-repeat;
+  background-size: 90px 90px;
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
+
+/* footer always at bottom */
+/* https://codepen.io/cbracco/pen/zekgx */
+
+html {
+  box-sizing: border-box;
+  height: 100%;
+}
+body {
+  position: relative;
+  min-height: 100%;
+  padding-bottom: 4rem;
+}
+
+.buttons .btn {
+  margin: 3px;
+}
+
+.footer {
+  position: absolute;
+  padding: 1rem;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+  text-align: center;
+}
+
+/* end footer always at bottom */
+
+.CodeMirror {
+  border: 1px solid #eee;
+  margin: 8px 0 8px 0;
+  height: auto;
+}
+
+
+.lint-error {
+  font-family: arial;
+  font-size: 70%;
+  background: #ffa;
+  color: #a00;
+  padding: 2px 5px 3px;
+}
+
+.lint-error-icon {
+  color: white;
+  background-color: red;
+  font-weight: bold;
+  border-radius: 50%;
+  padding: 0 3px;
+  margin-right: 7px;
+}
