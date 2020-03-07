@@ -4,7 +4,7 @@
         cljsjs/codemirror {:mvn/version "5.44.0-1"}
         cljsjs/parinfer-codemirror {:mvn/version "1.4.1-2"}
         borkdude/sci {:git/url "https://github.com/borkdude/sci"
-                      :sha "4546b4ab1db7d4af6326fe8c09eaac900bae6b9b"}
+                      :sha "d768910b6c4f51fc9b3331f5d8ddefc59c1f4f36"}
         cljs-ajax {:mvn/version "0.8.0"}
         appliedscience/js-interop {:mvn/version "0.1.20"}}
  :paths ["src" "resources"]
