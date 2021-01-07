@@ -1,16 +1,21 @@
 {:deps {org.clojure/clojure {:mvn/version "1.10.1"}
-        org.clojure/clojurescript {:mvn/version "1.10.520"}
-        reagent {:mvn/version "0.8.1"}
-        cljsjs/codemirror {:mvn/version "5.44.0-1"}
-        cljsjs/parinfer-codemirror {:mvn/version "1.4.1-2"}
-        borkdude/sci {:git/url "https://github.com/borkdude/sci"
-                      :sha "d768910b6c4f51fc9b3331f5d8ddefc59c1f4f36"}
-        cljs-ajax {:mvn/version "0.8.0"}
-        appliedscience/js-interop {:mvn/version "0.1.20"}}
+        ;; https://clojure.atlassian.net/browse/CLJS-3293
+        org.clojure/clojurescript {:git/url "https://github.com/nextjournal/clojurescript"
+                                   :sha "f48609b862062caae6d19d5d281c4f7b53a39c25"}
+        reagent/reagent {:mvn/version "1.0.0"
+                         :exclusions [cljsjs/react
+                                      cljsjs/react-dom
+                                      cljsjs/react-dom-server]}
+        nextjournal/clojure-mode {:local/root "/Users/mk/dev/clojure-mode"
+                                  :git/url "https://github.com/nextjournal/clojure-mode"
+                                  :sha "cf7ac2338e3ab33996a5d88484e2a5bc28b2fe36"}
+        borkdude/sci {:mvn/version "0.2.0"}
+        cljs-ajax/cljs-ajax {:mvn/version "0.8.0"}
+        applied-science/js-interop {:mvn/version "0.2.7"}}
  :paths ["src" "resources"]
  :aliases {:fig {:extra-deps
                  {com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}
-                  com.bhauman/figwheel-main {:mvn/version "0.2.3"}}
+                  com.bhauman/figwheel-main {:mvn/version "0.2.12"}}
                  :extra-paths ["src" "target" "test"]}
            :dev {:main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}
            :build {:main-opts ["-m" "cljs.main" "-O" "advanced"

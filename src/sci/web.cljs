@@ -1,17 +1,13 @@
 (ns ^:figwheel-hooks sci.web
   (:require
    [applied-science.js-interop :as j]
-   [cljsjs.codemirror]
-   [cljsjs.codemirror.addon.edit.matchbrackets]
-   [cljsjs.codemirror.addon.lint.lint]
-   [cljsjs.codemirror.addon.runmode.runmode]
-   [cljsjs.codemirror.mode.clojure]
-   [cljsjs.parinfer]
-   [cljsjs.parinfer-codemirror]
+   [nextjournal.clojure-mode :as cm]
    [reagent.core :as r]
+   [reagent.dom :as rdom]
    [sci.core :refer [eval-string]]
    [sci.gist :as gist])
   (:import [goog Uri]))
+
 
 (defonce initial-code (atom "(defmacro bindings []
   (zipmap (mapv #(list 'quote %) (keys &env))
@@ -86,7 +82,7 @@
                      :auto-complete "off"}])
     :component-did-mount
     (fn [this]
-      (let [node (r/dom-node this)
+      (let [node (rdom/dom-node this)
             opts #js {:mode "clojure"
                       :matchBrackets true
                       ;;parinfer does this better
@@ -200,7 +196,7 @@
                            (fn [_] (reset! loading? false)))))}))
 
 (defn mount [el]
-  (r/render-component [app] el))
+  (rdom/render [app] el))
 
 (defn mount-app-element []
   (set! (.-onpopstate js/window)
