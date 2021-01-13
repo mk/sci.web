@@ -5,7 +5,6 @@ pom.xml
 /out/
 /target/
 /node_modules/
-package.json
 package-lock.json
 .lein-deps-sum
 .lein-repl-history
