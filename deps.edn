@@ -6,9 +6,9 @@
                          :exclusions [cljsjs/react
                                       cljsjs/react-dom
                                       cljsjs/react-dom-server]}
-        nextjournal/clojure-mode {:local/root "/Users/mk/dev/clojure-mode"
+        nextjournal/clojure-mode {#_#_:local/root "/Users/mk/nextjournal/modules/clojure-mode"
                                   :git/url "https://github.com/nextjournal/clojure-mode"
-                                  :sha "cf7ac2338e3ab33996a5d88484e2a5bc28b2fe36"}
+                                  :sha "f46688eba79953648e7a8920ca79e48fc1414867"}
         borkdude/sci {:mvn/version "0.2.0"}
         cljs-ajax/cljs-ajax {:mvn/version "0.8.0"}
         applied-science/js-interop {:mvn/version "0.2.7"}}
