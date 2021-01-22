@@ -3,6 +3,9 @@
   :auto-testing false}
 {:main sci.web
  :install-deps true
+ :language-out :es-next
+ :language-in  :es-next
+ :rewrite-polyfills false
  :npm-deps {"@cljs-oss/module-deps" "1.1.1",
             "@codemirror/autocomplete" "0.17.2",
             "@codemirror/closebrackets" "0.17.2",
