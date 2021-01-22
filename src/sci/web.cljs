@@ -1,6 +1,11 @@
 (ns ^:figwheel-hooks sci.web
   (:require
    [applied-science.js-interop :as j]
+   ["@codemirror/fold" :as fold]
+   ["@codemirror/highlight" :as highlight]
+   ["@codemirror/history" :refer [history historyKeymap]]
+   ["@codemirror/state" :refer [EditorState]]
+   ["@codemirror/view" :as view :refer [EditorView]]
    [nextjournal.clojure-mode :as cm]
    [reagent.core :as r]
    [reagent.dom :as rdom]
@@ -71,7 +76,51 @@
                     "clojure"
                     (js/document.getElementById "result"))))))))
 
-(defn editor [id]
+
+(def theme
+  (.theme EditorView
+          (j/lit {:$content {:white-space "pre-wrap"
+                             :padding "10px 0"}
+                  :$$focused {:outline "none"}
+                  :$line {:padding "0 9px"
+                          :line-height "1.6"
+                          :font-size "16px"
+                          :font-family "var(--code-font)"}
+                  :$matchingBracket {:border-bottom "1px solid var(--teal-color)"
+                                     :color "inherit"}
+                  :$gutters {:background "transparent"
+                             :border "none"}
+                  :$gutterElement {:margin-left "5px"}
+                  ;; only show cursor when focused
+                  :$cursor {:visibility "hidden"}
+                  "$$focused $cursor" {:visibility "visible"}})))
+
+
+(defn editor [id {:keys [eval?]}]
+  (r/with-let [!view (r/atom nil)
+               source (case id
+                        "code" @initial-code
+                        "opts" @initial-opts)
+               #_#_
+               last-result (when eval? (r/atom (sci/eval-string source)))
+               mount! (fn [el]
+                        (when el
+                          (reset! !view (new EditorView
+                                             #js {:state (.create EditorState #js {:doc source
+                                                                                   :extensions #js [theme cm/default-extensions]})
+                                                  :parent el}))))]
+    [:div
+     [:div {:class "rounded-md mb-0 text-sm monospace overflow-auto relative border shadow-lg bg-white"
+            :ref mount!
+            :style {:max-height 410}}]
+     #_
+     (when eval?
+       [:div.mt-3.mv-4.pl-6 {:style {:white-space "pre-wrap" :font-family "var(--code-font)"}}
+        (prn-str @last-result)])]
+    (finally
+      (j/call @!view :destroy))))
+
+(defn editor-old [id]
   (r/create-class
    {:render (fn [] [:textarea
                     {:type "text"
@@ -93,7 +142,6 @@
             cm (.fromTextArea js/CodeMirror
                               node
                               opts)]
-        (js/parinferCodeMirror.init cm)
         (.removeKeyMap cm)
         (.setOption cm "extraKeys" #js {:Shift-Tab false
                                         :Tab false})
@@ -162,6 +210,7 @@
                 :on-click #(load-example % gist)} title]])]])
 
 (defn app []
+  (js/console.log :hello)
   (r/create-class
    {:reagent-render
     (fn []
