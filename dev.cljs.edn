@@ -1,4 +1,24 @@
 ^{:watch-dirs ["src"]
   :css-dirs ["resources/public/css"]
   :auto-testing false}
-{:main sci.web}
+{:main sci.web
+ :install-deps true
+ :npm-deps {"@cljs-oss/module-deps" "1.1.1",
+            "@codemirror/autocomplete" "0.17.2",
+            "@codemirror/closebrackets" "0.17.2",
+            "@codemirror/commands" "0.17.1",
+            "@codemirror/comment" "0.17.1",
+            "@codemirror/fold" "0.17.1",
+            "@codemirror/gutter" "0.17.1",
+            "@codemirror/highlight" "0.17.1",
+            "@codemirror/history" "0.17.1",
+            "@codemirror/language" "0.17.2",
+            "@codemirror/lint" "0.17.1",
+            "@codemirror/matchbrackets" "0.17.2",
+            "@codemirror/rectangular-selection" "0.17.1",
+            "@codemirror/search" "0.17.1",
+            "@codemirror/state" "0.17.1",
+            "@codemirror/view" "0.17.3",
+            "lezer-clojure" "0.1.10",
+            "react" "17.0.1",
+            "react-dom" "17.0.1"}}
